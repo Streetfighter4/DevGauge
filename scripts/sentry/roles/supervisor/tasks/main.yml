@@ -1,0 +1,11 @@
+- name: Install supervisor
+  apt: pkg=supervisor state=latest
+  notify: Restart supervisor
+
+- name: Configure supervisor
+  template: src=supervisord.conf.tpl dest=/etc/supervisor/supervisord.conf
+  notify: Reload supervisor
+  
+- name: Configure supervisor
+  template: src=sentry.conf.tpl dest=/etc/supervisor/conf.d/sentry.conf
+  notify: Reload supervisor

@@ -1,0 +1,51 @@
+- name: Install virtualenv
+  pip: name=virtualenv
+
+- name: Install psycopg2 packages
+  pip: 
+    name: psycopg2
+    virtualenv: /www/sentry
+    virtualenv_site_packages: no
+
+- name: Install python-memcached packages
+  pip: 
+    name: python-memcached
+    virtualenv: /www/sentry
+    virtualenv_site_packages: no  
+
+- name: Install django-pylibmc packages
+  pip: 
+    name: django-pylibmc
+    virtualenv: /www/sentry
+    virtualenv_site_packages: no        
+
+- name: Install Sentry and create virtualenv if needed
+  pip:
+    name: sentry
+    virtualenv: /www/sentry/
+    virtualenv_site_packages: no
+
+- name: Install Sentry[postgres] and create virtualenv if needed
+  pip:
+    name: sentry[postgres]
+    virtualenv: /www/sentry/
+    virtualenv_site_packages: no
+
+- name: Install extensions
+  pip: name={{item}} executable=/www/sentry/bin/pip
+  with_items: '{{ sentry.extensions }}'   
+
+- name: Initialize Sentry config
+  command: /www/sentry/bin/sentry init /etc/sentry
+
+- name: Change Sentry config
+  template: src={{ sentry.template }} dest=/etc/sentry/sentry.conf.py owner=root group=root mode=644
+
+- name: Upgrade Sentry schema
+  command: /www/sentry/bin/sentry --config=/etc/sentry/sentry.conf.py upgrade --noinput
+
+- name: Create Sentry superuser
+  command: /www/sentry/bin/sentry --config=/etc/sentry/sentry.conf.py createuser --email={{ sentry.admin_email }} --superuser --no-password --no-input
+
+- name: Set cron to cleanup Sentry
+  cron: name="Cleanup sentry" minute="0" hour="3" job="/www/sentry/bin/sentry cleanup --days=30"

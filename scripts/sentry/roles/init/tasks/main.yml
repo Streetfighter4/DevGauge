@@ -1,0 +1,38 @@
+---
+- name: Update apt
+  apt: update_cache=yes
+
+- name: Adding apt repository
+  apt_repository: repo='{{ redis_repository }}' state=present
+
+- name: Install System Packages
+  apt: pkg={{ item }} state=latest
+  with_items:
+    - curl
+    - wget
+    - python-software-properties
+
+- name: Update apt
+  apt: update_cache=yes
+
+- name: Install Extra Packages
+  apt: pkg={{ item }} state=latest
+  with_items: '{{ sys_packages }}'
+  notify: Restart redis
+
+- name: Configure the timezone
+  template: src=timezone.tpl dest=/etc/timezone
+
+- name: More Configure the timezone
+  file: src=/usr/share/zoneinfo/{{timezone}} dest=/etc/localtime state=link force=yes backup=yes
+
+- name: Set the hostname in /etc/hostname
+  shell: echo {{ hostname }} > /etc/hostname
+  when: hostname is defined
+
+- name: Set the hostname
+  shell: hostname {{ hostname }}
+  when: hostname is defined
+
+- name: Update /etc/hosts
+  lineinfile: dest=/etc/hosts regexp='^127\.0\.0\.1' line='127.0.0.1 localhost {{ hostname }}' owner=root group=root mode=0644

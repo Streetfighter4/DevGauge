@@ -1,0 +1,5 @@
+pgsql:
+    user: sentry
+    password: sentry
+    database: sentry
+    auth_template: pg_hba.conf.tpl
