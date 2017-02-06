@@ -1,4 +1,6 @@
 import requests
+from bs4 import BeautifulSoup
+
 from src.dynamic.elasticsearch_connection import es_connect
 from flask import Blueprint
 from flask import Response
@@ -32,3 +34,10 @@ def gitTracking():
             es_connect.es.index(index='dev_meter', doc_type='git_users', id=commit_body['user_id'], body=commit_body)
 
     return Response(status=200)
+
+
+def git_blame(url, line):
+    html_doc = requests.get(url)
+    soup = BeautifulSoup(html_doc.content, 'html.parser')
+    user_link = soup.find('td', {'id': 'L' + str(line)}).parent.parent.find('tr', {'class': 'blame-commit'}).find('a')['href']
+    print(user_link)
