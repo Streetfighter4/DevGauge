@@ -40,4 +40,4 @@ def git_blame(url, line):
     html_doc = requests.get(url)
     soup = BeautifulSoup(html_doc.content, 'html.parser')
     user_link = soup.find('td', {'id': 'L' + str(line)}).parent.parent.find('tr', {'class': 'blame-commit'}).find('a')['href']
-    print(user_link)
+    return user_link

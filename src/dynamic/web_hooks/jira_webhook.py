@@ -13,7 +13,6 @@ def tracking():
     issueUrl = request.get_json()['issue']['self']
 
     if es_connect.test_connection():
-        print(issueUrl)
         jira_response = requests.get(issueUrl , auth=('groznika123@gmail.com', 'Streetfighter4')).json()
         id = jira_response['id']
         status = jira_response['fields']['status']['statusCategory']['name']
