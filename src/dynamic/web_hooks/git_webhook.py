@@ -1,5 +1,4 @@
 import requests
-from bs4 import BeautifulSoup
 
 from src.dynamic.elasticsearch_connection import es_connect
 from flask import Blueprint
@@ -10,7 +9,6 @@ hook = Blueprint('githook', __name__)
 
 @hook.route('/git_webhook', methods=['GET','POST'])
 def gitTracking():
-    print('In gitTracking()')
     if es_connect.test_connection():
         git_response = request.get_json()
         commit_url = git_response['repository']['commits_url'].rsplit("{",1)[0] + '/'
@@ -19,6 +17,7 @@ def gitTracking():
 
             commit_info = requests.get(commit_url + sha).json() #TODO: add authentication
             commit_body = {
+
                 "user_id" : commit_info['author']['id'],
                 "author_email" : commit_info['commit']['author']['email'],
                 "additions" : commit_info['stats']['additions'],
@@ -34,10 +33,3 @@ def gitTracking():
             es_connect.es.index(index='dev_meter', doc_type='git_users', id=commit_body['user_id'], body=commit_body)
 
     return Response(status=200)
-
-
-def git_blame(url, line):
-    html_doc = requests.get(url)
-    soup = BeautifulSoup(html_doc.content, 'html.parser')
-    user_link = soup.find('td', {'id': 'L' + str(line)}).parent.parent.find('tr', {'class': 'blame-commit'}).find('a')['href']
-    return user_link

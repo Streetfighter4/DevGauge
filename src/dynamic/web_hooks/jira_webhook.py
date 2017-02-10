@@ -9,9 +9,9 @@ hook = Blueprint('jirahook', __name__)
 
 
 @hook.route('/jira_webhook', methods=['GET','POST'])
-def tracking():
+def whenIssueUpdate():
     issueUrl = request.get_json()['issue']['self']
-
+    print(issueUrl)
     if es_connect.test_connection():
         jira_response = requests.get(issueUrl , auth=('groznika123@gmail.com', 'Streetfighter4')).json()
         id = jira_response['id']
