@@ -8,7 +8,7 @@ from datetime import datetime
 hook = Blueprint('jirahook', __name__)
 
 
-@hook.route('/jira_webhook', methods=['GET','POST'])
+@hook.route('/jira_webhook', methods=['POST'])
 def whenIssueUpdate():
     issueUrl = request.get_json()['issue']['self']
     print(issueUrl)
@@ -42,4 +42,10 @@ def whenIssueUpdate():
 
         es_connect.es.index(index='dev_meter', doc_type='jira_issues', id=id, body=issue)
 
+    return Response(status=200)
+
+
+@hook.route('/oauth_callback', methods=['GET', 'POST'])
+def oauth_callback():
+    print (request.get_json())
     return Response(status=200)

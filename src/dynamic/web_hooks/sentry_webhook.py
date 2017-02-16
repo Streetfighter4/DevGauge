@@ -9,7 +9,7 @@ from flask import Response
 hook = Blueprint('sentryhook', __name__)
 
 
-@hook.route('/sentry_webhook', methods=['GET','POST'])#TODO: check if can delete get
+@hook.route('/sentry_webhook', methods=['POST'])
 def sentry_webhook():
     print ('in sentry')
     print (request.get_json())

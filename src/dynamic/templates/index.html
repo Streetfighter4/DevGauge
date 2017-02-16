@@ -1,10 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <p>My project</p>
-</body>
-</html>
+ {% extends "base.html" %}
+ {% block content %}
+    <form action="{{url_for('setup_project')}}" method="post">
+        <label> Git Repo <input type="text" name="git_repo"/> </label>
+        <label> Sentry Project <input type="text" name="sentry_project"/> </label>
+        <label> Jira Project <input type="text" name="jira_project"/> </label>
+        <input type="submit" value="Submit">
+    </form>
+{% endblock %}

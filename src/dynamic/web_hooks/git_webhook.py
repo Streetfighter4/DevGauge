@@ -7,7 +7,7 @@ from flask import request
 
 hook = Blueprint('githook', __name__)
 
-@hook.route('/git_webhook', methods=['GET','POST'])
+@hook.route('/git_webhook', methods=['POST'])
 def gitTracking():
     if es_connect.test_connection():
         git_response = request.get_json()
