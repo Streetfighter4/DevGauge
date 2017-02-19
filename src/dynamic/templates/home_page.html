@@ -1,0 +1,6 @@
+{% block content %}
+    <h2>Home page</h2>
+    <p>This page can be accessed by anyone. ala bala portokala</p><br/>
+    <p><a href={{ url_for('home_page.home_page') }}>Home page</a> (anyone)</p>
+    <p><a href={{ url_for('settings.setup_project') }}>Set up project</a> (login required)</p>
+{% endblock %}

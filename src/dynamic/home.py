@@ -1,21 +1,16 @@
-import requests
-from flask import Response
+from flask import Flask
+from flask import redirect
 from flask import render_template
 from flask import render_template_string
 from flask import request
-from flask_dance.contrib.jira import jira, make_jira_blueprint
-from flask import redirect
 from flask import url_for
-from src.dynamic.elasticsearch_connection import es_connect
-import os
 from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import login_required, UserManager, UserMixin, SQLAlchemyAdapter, current_user
-from src.dynamic.config.config_class import ConfigClass
 
-from src.dynamic.web_hooks import jira_webhook, git_webhook, sentry_webhook
-from src.dynamic.login import login
-from flask import Flask
+from dynamic.config.config_class import ConfigClass
+from dynamic.elasticsearch_connection import es_connect
+from dynamic.web_hooks import jira_webhook, git_webhook, sentry_webhook
 
 
 def create_app():
@@ -87,7 +82,7 @@ def create_app():
     @login_required  # Use of @login_required decorator
     def setup_project():
         if request.method == 'GET':
-            return render_template('index.html')
+            return render_template('setup_project.html')
         else:
             print('hey')
             if es_connect.test_connection():
@@ -98,7 +93,8 @@ def create_app():
                     "email" : current_user.email,
                     "git_repo" : request.form['git_repo'],
                     "sentry_project" : request.form['sentry_project'],
-                    "jira_project": request.form['jira_project']
+                    "jira_project": request.form['jira_project'],
+                    "files" : []
                 }
                 print(project_info)
                 es_connect.es.index(index='dev_meter', doc_type='project_registration', id=current_user.email, body=project_info)
@@ -139,4 +135,4 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(port=80, host='192.168.0.100')
+    app.run(host='192.168.1.100', debug=True)

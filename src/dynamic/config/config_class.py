@@ -4,7 +4,7 @@ import os
 class ConfigClass():
     # Flask settings
     SECRET_KEY =              os.getenv('SECRET_KEY',       'THIS IS AN INSECURE SECRET')
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL',     'mysql+pymysql://yassen:Streetfighter4@localhost/devmeter')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL',     'mysql+pymysql://yassen:Groznika12@localhost/devmeter')
     CSRF_ENABLED = True
 
     # Flask-Mail settings

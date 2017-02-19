@@ -1,6 +1,6 @@
 import requests
 from elasticsearch import Elasticsearch
-from src.dynamic.config.urls import *
+from dynamic.config.urls import *
 
 es = Elasticsearch([{'host': HOST_URL, 'port': ELASTICSEARCH_PORT}])
 

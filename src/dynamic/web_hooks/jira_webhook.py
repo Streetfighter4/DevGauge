@@ -1,5 +1,5 @@
 import requests
-from src.dynamic.elasticsearch_connection import es_connect
+from dynamic.elasticsearch_connection import es_connect
 from flask import Blueprint
 from flask import request
 from flask import Response
