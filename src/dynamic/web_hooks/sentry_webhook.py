@@ -20,26 +20,26 @@ def sentry_webhook():
                 }
             }
         }
-        git_repo = ""
+
         project_search = es_connect.es.search(index='dev_meter', body = query_body)
+
         if project_search['hits']['total'] > 0:
+            project_email = project_search['hits']['hits'][0]['_id']
             git_repo = project_search['hits']['hits'][0]['_source']['git_repo']
         else:
-            return "fuck u"
-        print(git_repo)
+            return "fuck u" #TODO throw exaption
+
         values = sentry_response['event']['sentry.interfaces.Exception']['values']
-        print(sentry_response)
+
         for value in values:
             frames = value['stacktrace']['frames']
             for frame in frames:
                 good_path = frame['filename'].replace("\\", "/")
-                print(good_path)
                 git_repo_name = git_repo.split("/")[-1]
                 if git_repo_name in good_path:
                     good_path = good_path.split(git_repo_name)[-1]
 
-                git_email = git_common.git_blame(git_repo, frame['filename'], frame['line'])
-                project_email = project_search['hits']['hits'][0]['_id']
+                git_email = git_common.git_blame(git_repo, good_path, frame['lineno'])
                 file_update_query = update_files.update_files_with_query(good_path)
                 user_update_query = update_files.update_users_error_with_query(git_email)
                 es_connect.es.update(index='dev_meter', doc_type='project_registration', id=project_email, body=file_update_query)

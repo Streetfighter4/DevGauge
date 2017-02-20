@@ -11,6 +11,7 @@ from flask_user import login_required, UserManager, UserMixin, SQLAlchemyAdapter
 from dynamic.config.config_class import ConfigClass
 from dynamic.elasticsearch_connection import es_connect
 from dynamic.web_hooks import jira_webhook, git_webhook, sentry_webhook
+from dynamic.controlers import settings
 
 
 def create_app():
@@ -20,6 +21,7 @@ def create_app():
     app.register_blueprint(jira_webhook.hook)
     app.register_blueprint(git_webhook.hook)
     app.register_blueprint(sentry_webhook.hook)
+    app.register_blueprint(settings.settings_blue_print)
 
     # Initialize Flask extensions
     db = SQLAlchemy(app)  # Initialize Flask-SQLAlchemy
@@ -59,7 +61,7 @@ def create_app():
                 <p>This page can be accessed by anyone.</p><br/>
                 <p><a href={{ url_for('home_page') }}>Home page</a> (anyone)</p>
                 <p><a href={{ url_for('members_page') }}>Members page</a> (login required)</p>
-                <p><a href={{ url_for('setup_project') }}>Set up project</a> (login required)</p>
+                <p><a href={{ url_for('settings.setup_project') }}>Set up project</a> (login required)</p>
             {% endblock %}
             """)
 
@@ -78,29 +80,6 @@ def create_app():
             """)
 
 
-    @app.route('/setup', methods=['GET', 'POST'])
-    @login_required  # Use of @login_required decorator
-    def setup_project():
-        if request.method == 'GET':
-            return render_template('setup_project.html')
-        else:
-            print('hey')
-            if es_connect.test_connection():
-                print('hey1.5')
-                print(current_user.email)
-                print(request.form.get('git_repo'))
-                project_info = {
-                    "email" : current_user.email,
-                    "git_repo" : request.form['git_repo'],
-                    "sentry_project" : request.form['sentry_project'],
-                    "jira_project": request.form['jira_project'],
-                    "files" : [],
-                    "users": [],
-                }
-                print(project_info)
-                es_connect.es.index(index='dev_meter', doc_type='project_registration', id=current_user.email, body=project_info)
-            print('hey2')
-            return redirect(url_for('home_page'))
 
 
     return app
