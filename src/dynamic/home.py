@@ -94,7 +94,8 @@ def create_app():
                     "git_repo" : request.form['git_repo'],
                     "sentry_project" : request.form['sentry_project'],
                     "jira_project": request.form['jira_project'],
-                    "files" : []
+                    "files" : [],
+                    "users": [],
                 }
                 print(project_info)
                 es_connect.es.index(index='dev_meter', doc_type='project_registration', id=current_user.email, body=project_info)

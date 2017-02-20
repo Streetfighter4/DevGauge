@@ -38,10 +38,11 @@ def sentry_webhook():
                 if git_repo_name in good_path:
                     good_path = good_path.split(git_repo_name)[-1]
 
-                username = git_common.git_blame(git_repo, frame['filename'], frame['line'])
-                email = project_search['hits']['hits'][0]['_id']
-                update = update_files.update_files_with_query(good_path)
-                es_connect.es.update(index='dev_meter', doc_type='project_registration', id=email, body=update)
-
+                git_email = git_common.git_blame(git_repo, frame['filename'], frame['line'])
+                project_email = project_search['hits']['hits'][0]['_id']
+                file_update_query = update_files.update_files_with_query(good_path)
+                user_update_query = update_files.update_users_error_with_query(git_email)
+                es_connect.es.update(index='dev_meter', doc_type='project_registration', id=project_email, body=file_update_query)
+                es_connect.es.update(index='dev_meter', doc_type='project_registration', id=project_email, body=user_update_query)
 
     return Response(status=200)
