@@ -4,6 +4,7 @@ from flask import Blueprint
 from flask import request
 from flask import Response
 from datetime import datetime
+from dynamic.queries.update_files import update_issues, get_issue_start_time
 
 hook = Blueprint('jirahook', __name__)
 
@@ -11,36 +12,51 @@ hook = Blueprint('jirahook', __name__)
 @hook.route('/jira_webhook', methods=['POST'])
 def whenIssueUpdate():
     issueUrl = request.get_json()['issue']['self']
-    print(issueUrl)
+    project_name = request.get_json()['issue']['fields']['project']['name']
+    print('---->project_name' + str(project_name))
+    print('----->request' + str(request.get_json()))
     if es_connect.test_connection():
-        jira_response = requests.get(issueUrl , auth=('groznika123@gmail.com', 'Streetfighter4')).json()
-        id = jira_response['id']
-        status = jira_response['fields']['status']['statusCategory']['name']
-        issue = {}
-        found = es_connect.es.exists(index='dev_meter', doc_type='jira_issues', id=id)
-        if found:
-            es_res = es_connect.es.get(index='dev_meter', doc_type='jira_issues', id=id)
-            issue = es_res['_source']
-            issue['status'] = status
-        else:
-            issue = {
-                "summary" : jira_response['fields']['summary'],
-                "status" : status,
-                "assignee_email" : jira_response['fields']['assignee']['emailAddress'],
-                "curr_start_time" : None,
-                "total_time" : 0
+        query_body = {
+            "query": {
+                "term": {
+                    "jira_project": project_name.lower()
+                }
             }
-            #TODO: reformat as git webhook
+        }
+        project_search = es_connect.es.search(index='dev_meter', body=query_body)
+        print('----->project_search: ' + str(project_search))
+        if project_search['hits']['total'] > 0:
+            project_email = project_search['hits']['hits'][0]['_id']
+        else:
+            return Response(status_code=500)  # TODO throw exaption
 
+        jira_response = requests.get(issueUrl , auth=('amind@abv.bg', 'Streetfighter4')).json()
+        status = jira_response['fields']['status']['statusCategory']['name']
+
+        issue = {
+            "summary" : jira_response['fields']['summary'],
+            "status" : status,
+            "curr_start_time" : get_issue_start_time(jira_response['fields']['summary']),
+            "total_time" : 0
+        }
+
+        assignee_email = jira_response['fields']['assignee']['emailAddress']
         if issue['status'] == 'In Progress':
             issue['curr_start_time'] = jira_response['fields']['updated']
         elif issue['curr_start_time'] != None:
             format = '%Y-%m-%dT%H:%M:%S'
             updated_at = datetime.strptime(jira_response['fields']['updated'].rsplit(".", 1)[0], format)
             start_time = datetime.strptime(issue['curr_start_time'].rsplit(".", 1)[0], format)
-            issue['total_time'] += (updated_at - start_time).seconds
+            print('----->updated_at: ' + str(updated_at))
+            print('----->start_time: ' + str(start_time))
+            print('----->updated_at - start_time: ' + str(updated_at - start_time))
+            print('----->updated_at - start_time.seconds: ' + str((updated_at - start_time).seconds))
+            issue['total_time'] = (updated_at - start_time).seconds
+            issue['curr_start_time'] = None
 
-        es_connect.es.index(index='dev_meter', doc_type='jira_issues', id=id, body=issue)
+        update_issue = update_issues(issue, assignee_email)
+
+        es_connect.es.update(index='dev_meter', doc_type='project_registration', id=project_email, body=update_issue)
 
     return Response(status=200)
 

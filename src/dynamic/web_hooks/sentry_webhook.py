@@ -16,7 +16,7 @@ def sentry_webhook():
         query_body = {
             "query" : {
                 "term" : {
-                    "sentry_project": sentry_response['project']
+                    "sentry_project": sentry_response['project'].lower()
                 }
             }
         }
