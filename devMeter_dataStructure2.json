@@ -1,0 +1,37 @@
+{
+  "mappings": {
+    "project_registration":{
+      "properties":{
+         "sentry_project":{"type":"text"},
+         "email":{"type":"text"},
+         "jira_project":{"type":"text"},
+         "git_repo":{"type":"text"}
+      }
+   },
+   "file": {
+    "properties":{
+         "filename":{"type":"text"},
+         "error_count":{"type":"integer"},
+         "project_registration": {"type":"text"}
+      }
+   },
+   "jira_issues":{
+      "properties":{
+         "summary":{"type":"keyword"},
+         "curr_start_time":{"type":"text"},
+         "total_time":{"type":"integer"},
+         "status":{"type":"text"},
+         "project_registration": {"type":"text"}
+      }
+  },
+  "users":{
+      "properties":{
+         "additions":{"type":"integer"},
+         "deletions":{"type":"integer"},
+         "error_count":{"type":"integer"},
+         "emailer":{"type":"keyword"},
+         "project_registration": {"type":"text"}
+         }
+      }
+   }
+}

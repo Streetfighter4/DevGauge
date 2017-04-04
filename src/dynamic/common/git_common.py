@@ -1,5 +1,4 @@
 import os
-import requests
 
 from git.repo.base import *
 
@@ -21,3 +20,6 @@ def git_blame(git_repo, filename, line):
             break
 
     return author.email
+
+
+

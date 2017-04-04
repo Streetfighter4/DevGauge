@@ -1,23 +1,18 @@
 from flask import Flask
-from flask import redirect
-from flask import render_template
 from flask import render_template_string
-from flask import request
-from flask import url_for
-from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
-from flask_user import login_required, UserManager, UserMixin, SQLAlchemyAdapter, current_user
+from flask_user import UserManager, UserMixin, SQLAlchemyAdapter
 
 from dynamic.config.config_class import ConfigClass
-from dynamic.elasticsearch_connection import es_connect
-from dynamic.web_hooks import jira_webhook, git_webhook, sentry_webhook
 from dynamic.controlers import settings
+from dynamic.web_hooks import jira_webhook, git_webhook, sentry_webhook
 
 
 def create_app():
     config = ConfigClass
     app = Flask(__name__)
     app.config.from_object(config)
+    app.config['TEMPLATES_AUTO_RELOAD']=True
     app.register_blueprint(jira_webhook.hook)
     app.register_blueprint(git_webhook.hook)
     app.register_blueprint(sentry_webhook.hook)
@@ -25,7 +20,6 @@ def create_app():
 
     # Initialize Flask extensions
     db = SQLAlchemy(app)  # Initialize Flask-SQLAlchemy
-    mail = Mail(app)  # Initialize Flask-Mail
 
     # Define the User data model. Make sure to add flask_user UserMixin !!!
     class User(db.Model, UserMixin):
@@ -55,62 +49,17 @@ def create_app():
     @app.route('/')
     def home_page():
         return render_template_string("""
-            {% extends "base.html" %}
-            {% block content %}
-                <h2>Home page</h2>
-                <p>This page can be accessed by anyone.</p><br/>
-                <p><a href={{ url_for('home_page') }}>Home page</a> (anyone)</p>
-                <p><a href={{ url_for('members_page') }}>Members page</a> (login required)</p>
-                <p><a href={{ url_for('settings.setup_project') }}>Set up project</a> (login required)</p>
-            {% endblock %}
-            """)
-
-    # The Members page is only accessible to authenticated users
-    @app.route('/members')
-    @login_required  # Use of @login_required decorator
-    def members_page():
-        return render_template_string("""
-            {% extends "base.html" %}
-            {% block content %}
-                <h2>Members page</h2>
-                <p>This page can only be accessed by authenticated users.</p><br/>
-                <p><a href={{ url_for('home_page') }}>Home page</a> (anyone)</p>
-                <p><a href={{ url_for('members_page') }}>Members page</a> (login required)</p>
-            {% endblock %}
-            """)
-
-
+               {% extends "base.html" %}
+               {% block content %}
+                   <h2>Home page</h2>
+                   <p>This page can be accessed by anyone.</p><br/>
+                   <p><a href={{ url_for('home_page') }}>Home page</a> (anyone)</p>
+                   <p><a href={{ url_for('settings.setup_project') }}>Set up project</a> (login required)</p>
+               {% endblock %}
+               """)
 
 
     return app
-
-# blueprint = make_jira_blueprint(
-#     base_url="https://devmeter1.atlassian.net",
-#     consumer_key="devmeterConsumerKey",
-#     rsa_key="C:/Users/Yasen/.ssh/jira.pem",
-#     redirect_url="/oauth"
-# )
-#
-#
-# app.register_blueprint(blueprint, url_prefix="/login")
-#
-# @app.route("/a")
-# def a():
-#     print (jira.authorized)
-#     if not jira.authorized:
-#         return redirect(url_for("jira.login"))
-#     jira_response = requests.get('https://devmeter1.atlassian.net/rest/api/2/issue/10000')
-#     print (jira_response)
-#     return "You are on Jira"
-#
-#
-# @app.route("/oauth")
-# def b():
-#     body = {
-#         "request" : request
-#     }
-#     response = Response(status=200, response=body)
-#     return response
 
 
 if __name__ == "__main__":

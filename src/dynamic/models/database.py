@@ -1,15 +1,11 @@
-
-
 # Initialize Flask extensions
-from flask.ext.mail import Mail
-from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.user import SQLAlchemyAdapter, UserManager
+from flask_sqlalchemy import SQLAlchemy
+from flask_user import UserManager, SQLAlchemyAdapter
 
 from dynamic.home import app
 from dynamic.models.user import User
 
 db = SQLAlchemy(app)  # Initialize Flask-SQLAlchemy
-mail = Mail(app)  # Initialize Flask-Mail
 # Create all database tables
 db.create_all()
 

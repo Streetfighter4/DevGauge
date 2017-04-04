@@ -26,6 +26,8 @@ def setup_project():
                 "files": [],
                 "users": [],
             }
-            es_connect.es.index(index='dev_meter', doc_type='project_registration', id=current_user.email,
-                                body=project_info)
+            es_connect.es.index(index='dev_meter', doc_type='project_registration',
+                                id=current_user.email, body=project_info)
         return redirect(url_for('home_page'))
+
+

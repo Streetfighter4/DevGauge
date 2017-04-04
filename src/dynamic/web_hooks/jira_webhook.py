@@ -13,8 +13,7 @@ hook = Blueprint('jirahook', __name__)
 def whenIssueUpdate():
     issueUrl = request.get_json()['issue']['self']
     project_name = request.get_json()['issue']['fields']['project']['name']
-    print('---->project_name' + str(project_name))
-    print('----->request' + str(request.get_json()))
+
     if es_connect.test_connection():
         query_body = {
             "query": {
@@ -24,13 +23,13 @@ def whenIssueUpdate():
             }
         }
         project_search = es_connect.es.search(index='dev_meter', body=query_body)
-        print('----->project_search: ' + str(project_search))
+
         if project_search['hits']['total'] > 0:
             project_email = project_search['hits']['hits'][0]['_id']
         else:
-            return Response(status_code=500)  # TODO throw exaption
+            return Response(status_code=500)
 
-        jira_response = requests.get(issueUrl , auth=('amind@abv.bg', 'Streetfighter4')).json()
+        jira_response = requests.get(issueUrl).json()
         status = jira_response['fields']['status']['statusCategory']['name']
 
         issue = {
@@ -47,16 +46,13 @@ def whenIssueUpdate():
             format = '%Y-%m-%dT%H:%M:%S'
             updated_at = datetime.strptime(jira_response['fields']['updated'].rsplit(".", 1)[0], format)
             start_time = datetime.strptime(issue['curr_start_time'].rsplit(".", 1)[0], format)
-            print('----->updated_at: ' + str(updated_at))
-            print('----->start_time: ' + str(start_time))
-            print('----->updated_at - start_time: ' + str(updated_at - start_time))
-            print('----->updated_at - start_time.seconds: ' + str((updated_at - start_time).seconds))
             issue['total_time'] = (updated_at - start_time).seconds
             issue['curr_start_time'] = None
 
         update_issue = update_issues(issue, assignee_email)
 
-        es_connect.es.update(index='dev_meter', doc_type='project_registration', id=project_email, body=update_issue)
+        es_connect.es.update(index='dev_meter', doc_type='project_registration',
+                             id=project_email, body=update_issue)
 
     return Response(status=200)
 

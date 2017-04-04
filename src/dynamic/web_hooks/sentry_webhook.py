@@ -27,7 +27,7 @@ def sentry_webhook():
             project_email = project_search['hits']['hits'][0]['_id']
             git_repo = project_search['hits']['hits'][0]['_source']['git_repo']
         else:
-            return "fuck u" #TODO throw exaption
+            return Response(status_code=500)
 
         values = sentry_response['event']['sentry.interfaces.Exception']['values']
 
@@ -42,7 +42,9 @@ def sentry_webhook():
                 git_email = git_common.git_blame(git_repo, good_path, frame['lineno'])
                 file_update_query = update_files.update_files_with_query(good_path)
                 user_update_query = update_files.update_users_error_with_query(git_email)
-                es_connect.es.update(index='dev_meter', doc_type='project_registration', id=project_email, body=file_update_query)
-                es_connect.es.update(index='dev_meter', doc_type='project_registration', id=project_email, body=user_update_query)
+                es_connect.es.update(index='dev_meter', doc_type='project_registration',
+                                     id=project_email, body=file_update_query)
+                es_connect.es.update(index='dev_meter', doc_type='project_registration',
+                                     id=project_email, body=user_update_query)
 
     return Response(status=200)

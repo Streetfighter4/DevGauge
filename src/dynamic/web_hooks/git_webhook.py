@@ -24,17 +24,18 @@ def gitTracking():
         if project_search['hits']['total'] > 0:
             project_email = project_search['hits']['hits'][0]['_id']
         else:
-            return Response(status_code=500)  # TODO throw exaption
+            return Response(status_code=500)
 
         commit_url = git_response['repository']['commits_url']
         for commit in git_response['commits']:
             sha = commit['id']
-            commit_info = requests.get(commit_url.replace('{/sha}', '/' + sha)).json() #TODO: add authentication
+            commit_info = requests.get(commit_url.replace('{/sha}', '/' + sha)).json()
 
             author_email = commit_info['commit']['author']['email']
             additions = commit_info['stats']['additions']
             deletions = commit_info['stats']['deletions']
             update_git_info = update_users_git_info(author_email, additions, deletions)
-            es_connect.es.update(index='dev_meter', doc_type='project_registration', id=project_email, body=update_git_info)
+            es_connect.es.update(index='dev_meter', doc_type='project_registration',
+                                 id=project_email, body=update_git_info)
 
     return Response(status=200)

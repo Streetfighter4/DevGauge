@@ -1,10 +1,18 @@
  {% extends "base.html" %}
  {% block content %}
     <form action="{{url_for('settings.setup_project')}}" method="post">
-        <label> Git Repo <input type="text" name="git_repo"/> </label>
-        <label> Sentry Project <input type="text" name="sentry_project"/> </label>
-        <label> Jira Project <input type="text" name="jira_project"/> </label>
-        <input type="submit" value="Submit">
-        dalishesepromenihtmla
+        <div class="form-group col-md-6 col-md-offset-3">
+            <label for="git_repo" class="col-2 col-form-label"> Git Repo</label>
+            <input type="text" placeholder="https://github.com/username/reponame" name="git_repo" id="git_repo" class="form-control"/>
+            <br>
+            <label for="sentry_project" class="col-2 col-form-label"> Sentry Project </label>
+            <input type="text" placeholder="sentryproject" name="sentry_project" id="sentry_project" class="form-control"/>
+            <br>
+            <label for="jira_project" class="col-2 col-form-label"> Jira Project </label>
+            <input type="text" placeholder="jiraproject" name="jira_project" id="jira_project" class="form-control"/>
+            <br>
+            <input class="btn btn-primary" type="submit" value="Submit">
+        </div>
     </form>
+    <div class="clearfix"/>
 {% endblock %}

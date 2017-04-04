@@ -1,5 +1,5 @@
 # Initialize Flask extensions
-from flask.ext.user import UserMixin
+from flask_user import UserMixin
 
 from dynamic.models.database import db
 

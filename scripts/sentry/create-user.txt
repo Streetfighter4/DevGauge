@@ -1,1 +1,0 @@
-/www/sentry/bin/sentry --config /etc/sentry/sentry.conf.py createuser
